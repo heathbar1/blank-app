@@ -43,7 +43,14 @@ class CryptoTradingBot:
         self.current_positions = {}
         self.market_data = {}
         self.data_lock = Lock()  # Thread safety
-        self.paper_trading_balance = self.rules.get("general_settings", {}).get("paper_trading_balance", 10000.0)
+        
+        # Initialize paper trading balance with proper error handling
+        if self.rules:
+            self.paper_trading_balance = self.rules.get("general_settings", {}).get("paper_trading_balance", 10000.0)
+        else:
+            self.paper_trading_balance = 10000.0
+            logger.error("Rules not loaded - using default paper trading balance")
+        
         self.paper_trading_positions = {}
         
         # Crypto symbol mapping for yfinance
@@ -144,6 +151,10 @@ class CryptoTradingBot:
     def connect_to_robinhood(self):
         """Connect to Robinhood API using credentials from rules."""
         try:
+            if not self.rules:
+                logger.error("Rules not loaded - cannot connect to Robinhood")
+                return False
+                
             if self.rules["general_settings"]["paper_trading"]:
                 logger.info("Paper trading mode - Robinhood connection simulated")
                 self.robinhood_logged_in = True
@@ -176,6 +187,11 @@ class CryptoTradingBot:
     def connect_to_claude_ai(self):
         """Initialize connection to Claude AI."""
         try:
+            if not self.rules:
+                logger.error("Rules not loaded - cannot connect to Claude AI")
+                self.claude_client = None
+                return True  # Continue with fallback analysis
+                
             api_key = self.rules["api_credentials"]["anthropic_api_key"]
             
             if api_key == "YOUR_ANTHROPIC_API_KEY_HERE":
@@ -333,6 +349,10 @@ class CryptoTradingBot:
     def calculate_indicators(self, crypto):
         """Calculate technical indicators for a cryptocurrency."""
         try:
+            if not self.rules:
+                logger.error("Rules not loaded - cannot calculate indicators")
+                return None
+                
             market_data = self.get_market_data(crypto)
             if not market_data:
                 return None
@@ -483,6 +503,15 @@ class CryptoTradingBot:
         """Fallback analysis when Claude AI is not available."""
         try:
             # Rule-based analysis using the custom strategy
+            if not self.rules:
+                return {
+                    "action": "hold",
+                    "confidence": 0.3,
+                    "reason": "Fallback Analysis: Rules not loaded",
+                    "price": price,
+                    "timestamp": datetime.datetime.now()
+                }
+                
             if pd.notna(rsi) and pd.notna(macd_diff):
                 rsi_params = self.rules["trading_strategy"]["indicators"][0]["parameters"]
                 
@@ -828,6 +857,10 @@ class CryptoTradingBot:
     def get_portfolio_data_from_db(self):
         """Get portfolio history from database."""
         try:
+            if not self.rules:
+                logger.error("Rules not loaded - cannot get portfolio data")
+                return pd.DataFrame()
+                
             conn = sqlite3.connect(self.db_path)
             df = pd.read_sql_query('''
                 SELECT timestamp, portfolio_value 
@@ -848,6 +881,10 @@ class CryptoTradingBot:
     def get_trade_data_from_db(self):
         """Get trade history from database."""
         try:
+            if not self.rules:
+                logger.error("Rules not loaded - cannot get trade data")
+                return pd.DataFrame()
+                
             conn = sqlite3.connect(self.db_path)
             df = pd.read_sql_query('''
                 SELECT timestamp, crypto, action, price, quantity, value, reason 
