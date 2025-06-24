@@ -1,0 +1,56 @@
+{
+  "general_settings": {
+    "paper_trading": true,
+    "paper_trading_balance": 10000.00
+  },
+  "api_credentials": {
+    "robinhood_api_key": "YOUR_ROBINHOOD_API_KEY_HERE"
+  },
+  "trading_parameters": {
+    "max_investment_per_trade": 100.00,
+    "stop_loss_percentage": 5.0,
+    "take_profit_percentage": 10.0,
+    "max_daily_trades": 10,
+    "max_open_positions": 5
+  },
+  "risk_management": {
+    "max_portfolio_allocation_percentage": 20.0,
+    "max_single_crypto_allocation_percentage": 5.0,
+    "daily_loss_limit_percentage": 3.0
+  },
+  "cryptocurrencies": [
+    "BTC",
+    "ETH",
+    "SOL",
+    "ADA",
+    "DOT"
+  ],
+  "trading_strategy": {
+    "timeframe": "1h",
+    "use_custom_strategy": true,
+    "custom_strategy": "Buy when RSI is below 30 and MACD histogram is turning positive. Sell when RSI is above 70 and MACD histogram is turning negative. Use a 5% stop loss on all trades.",
+    "indicators": [
+      {
+        "name": "RSI",
+        "parameters": {
+          "period": 14,
+          "overbought": 70,
+          "oversold": 30
+        }
+      },
+      {
+        "name": "MACD",
+        "parameters": {
+          "fast_period": 12,
+          "slow_period": 26,
+          "signal_period": 9
+        }
+      }
+    ],
+    "claude_ai": {
+      "confidence_threshold": 0.7,
+      "analysis_frequency": "hourly",
+      "data_sources": ["price_data", "market_sentiment", "news"]
+    }
+  }
+}
